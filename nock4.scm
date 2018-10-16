@@ -19,11 +19,14 @@
     (and (nnoun? a) (nnoun? b))]
    [,a #f]))
 
+(define (auto-cons a b) (list a b))  
+
 (define (ras a)
   (cond
    [(natom? a) a]
-   [(ncell? a) (cons (ras (car a)) 
-		     (ras (cadr a)))]))
+   [(ncell? a) (auto-cons (ras (car a)) 
+		     (ras (cadr a)))]
+   ))
 
 (define (nock4 a)
   (match (ras a)
