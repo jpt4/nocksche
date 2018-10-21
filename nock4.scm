@@ -51,6 +51,13 @@
     [(+ ,a) 
      (guard (natom? a))
      (+ 1 a)]
-    [,e `(* ,a)]
+    [(= (,a ,a)) 
+     (guard (natom? a)) 0]
+    [(= (,a ,b)) 
+     (guard (natom? a) (natom? b)
+	    (not (equal? a b)))
+     1]
+    [(= ,x) a] ;err, not an atom or cell of atoms
+    [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
