@@ -5,6 +5,8 @@
 
 (load "match.scm")
 
+(define (ntuple? a) (and (pair? a) (not (null? (cdr a)))))
+
 (define (nnoun? a)
   (or (natom? a) (ncell? a)))
 
@@ -24,9 +26,14 @@
 (define (ras a)
   (cond
    [(natom? a) a]
-   [(ncell? a) (auto-cons (ras (car a)) 
-		     (ras (cadr a)))]
-   ))
+   [(ncell? a) a]
+   [(ntuple? a)
+    (cond
+     [(null? (cddr a)) (auto-cons (ras (car a)) 
+				  (ras (cadr a)))]
+     [(not (null? (cddr a)))
+      (auto-cons (ras (car a)) (ras (cdr a)))]
+     )]))  
 
 (define (nock4 a)
   (match (ras a)
