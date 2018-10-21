@@ -7,6 +7,9 @@
 
 (define (ntuple? a) (and (pair? a) (not (null? (cdr a)))))
 
+;#->@, due to reserved characters
+(define (nop? a) (member a '(* ? + = / $)))
+
 (define (nnoun? a)
   (or (natom? a) (ncell? a)))
 
@@ -27,6 +30,7 @@
   (cond
    [(natom? a) a]
    [(ncell? a) a]
+   [(nop? a) a]
    [(ntuple? a)
     (cond
      [(null? (cddr a)) (auto-cons (ras (car a)) 
@@ -37,14 +41,12 @@
 
 (define (nock4 a)
   (match (ras a)
-    [(,a ,b . ,c) 
-     (guard (not (null? c)))
-     (cons a (list (cons b c)))]
-    [(,op (,a ,b))
-     (guard (equal? '? op) (not (equal? a b)))
+    [(? (,a ,b))
+     (guard (equal? a b))
      0]
-    [(,op ,a)
+    [(? ,a)
      (guard (natom? a))
      1]
-    [else a]))
+    [,a `(* ,a)]
+    ))
 
