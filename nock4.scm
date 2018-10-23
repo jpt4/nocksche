@@ -78,6 +78,15 @@
        (nock4 `(fas (3 ,res))))
      ]
     [(fas ,a) `(fas ,a)] ;err, not a vaild tree index
+    ;hax
+    [(hax (1 (,a ,b))) a]
+    [(hax (,a (,b ,c))) (guard (even? a))
+     (let ([res (nock4 `(fas ,(+ a 1) ,c))])
+       (nock4 `(hax (,(/ a 2) (,b ,res) ,c))))]
+    [(hax (,a (,b ,c))) (guard (odd? a) (>= a 3))
+     (let ([res (nock4 `(fas ,(- a 1) ,c))])
+       (nock4 `(hax (,(/ (- a 1) 2) (,res ,b) ,c))))]
+    [(hax ,a) `(hax ,a)] ;err, not a valid hax
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
