@@ -8,7 +8,7 @@
 (define (ntuple? a) (and (pair? a) (not (null? (cdr a)))))
 
 ;#->@, due to reserved characters
-(define (nop? a) (member a '(* ? + = / $)))
+(define (nop? a) (member a '(tar wut lus tis fas hax)))
 
 (define (nnoun? a)
   (or (natom? a) (ncell? a)))
@@ -41,23 +41,43 @@
 
 (define (nock4 a)
   (match (ras a)
-    [(? (,a ,b))
+    ;wut
+    [(wut (,a ,b))
      (guard (equal? a b))
      0]
-    [(? ,a)
+    [(wut ,a)
      (guard (natom? a))
      1]
-    [(+ (,a ,b)) `(+ (,a ,b))]
-    [(+ ,a) 
+    ;lus
+    [(lus (,a ,b)) `(lus (,a ,b))]
+    [(lus ,a) 
      (guard (natom? a))
      (+ 1 a)]
-    [(= (,a ,a)) 
+    ;tis
+    [(tis (,a ,a)) 
      (guard (natom? a)) 0]
-    [(= (,a ,b)) 
+    [(tis (,a ,b)) 
      (guard (natom? a) (natom? b)
 	    (not (equal? a b)))
      1]
-    [(= ,x) a] ;err, not an atom or cell of atoms
+    [(tis ,x) a] ;err, not an atom or cell of atoms
+    ;fas
+    [(fas (1 ,a)) 
+     (display '1-fas) (newline)
+     a]
+    [(fas (2 (,a ,b))) a]
+    [(fas (3 (,a ,b))) b]
+    [(fas (,a ,b)) 
+     (guard (even? a) (>= a 4))
+     (let ([res (nock4 `(fas (,(/ a 2) ,b)))])
+       (nock4 `(fas (2 ,res))))
+     ]
+    [(fas (,a ,b)) 
+     (guard (odd? a) (>= a 5))
+     (let ([res (nock4 `(fas (,(/ (- a 1) 2) ,b)))])
+       (nock4 `(fas (3 ,res))))
+     ]
+    [(fas ,a) `(fas ,a)] ;err, not a vaild tree index
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
