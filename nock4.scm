@@ -92,6 +92,21 @@
      (let ([resl (nock4 `(tar (,a ,b ,c)))]
 	   [resr (nock4 `(tar (,a ,d)))])
        `(,resl ,resr))]
+    [(tar (,a (0 ,b))) (nock4 `(fas (,b ,a)))]
+    [(tar (,a (1 ,b))) b]
+    [(tar (,a (2 (,b ,c))))
+     (let ([resl (nock4 `(tar (,a ,b)))]
+	   [resr (nock4 `(tar (,a ,c)))])
+       (nock4 `(tar (,resl ,resr))))]
+    [(tar (,a (3 ,b))) 
+     (let ([res (nock4 `(tar (,a ,b)))])
+       (nock4 `(wut ,res)))]
+    [(tar (,a (4 ,b))) 
+     (let ([res (nock4 `(tar (,a ,b)))])
+       (nock4 `(lus ,res)))]
+    [(tar (,a (5 ,b))) 
+     (let ([res (nock4 `(tar (,a ,b)))])
+       (nock4 `(tis ,res)))]
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
