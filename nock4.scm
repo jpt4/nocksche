@@ -87,6 +87,11 @@
      (let ([res (nock4 `(fas ,(- a 1) ,c))])
        (nock4 `(hax (,(/ (- a 1) 2) (,res ,b) ,c))))]
     [(hax ,a) `(hax ,a)] ;err, not a valid hax
+    ;s combinator
+    [(tar (,a ((,b ,c) ,d))) 
+     (let ([resl (nock4 `(tar (,a ,b ,c)))]
+	   [resr (nock4 `(tar (,a ,d)))])
+       `(,resl ,resr))]
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
