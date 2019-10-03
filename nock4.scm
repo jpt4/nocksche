@@ -7,7 +7,6 @@
 
 (define (ntuple? a) (and (pair? a) (not (null? (cdr a)))))
 
-;#->@, due to reserved characters
 (define (nop? a) (member a '(tar wut lus tis fas hax)))
 
 (define (nnoun? a)
@@ -15,7 +14,7 @@
 
 (define (natom? a) 
   (if (integer? a)
-      (> a 0)
+      (>= a 0)
       #f))
 
 (define (ncell? a)
@@ -39,7 +38,13 @@
       (auto-cons (ras (car a)) (ras (cdr a)))]
      )]))  
 
-(define (nock4 a)
+;Data passed to nock4 should, as per spec, be only of type noun.
+;The first pass of a nock interpreter tags the input with a tar for evaluation.
+;To test primitive operations, thread via the appropriate payload, or use nock4-aux
+;directly.
+(define (nock4 a) (nock4-aux `(tar ,a)))
+
+(define (nock4-aux a)
   (match (ras a)
     ;wut
     [(wut (,a ,b))
@@ -69,44 +74,46 @@
     [(fas (3 (,a ,b))) b]
     [(fas (,a ,b)) 
      (guard (even? a) (>= a 4))
-     (let ([res (nock4 `(fas (,(/ a 2) ,b)))])
-       (nock4 `(fas (2 ,res))))
+     (let ([res (nock4-aux `(fas (,(/ a 2) ,b)))])
+       (nock4-aux `(fas (2 ,res))))
      ]
     [(fas (,a ,b)) 
      (guard (odd? a) (>= a 5))
-     (let ([res (nock4 `(fas (,(/ (- a 1) 2) ,b)))])
-       (nock4 `(fas (3 ,res))))
+     (let ([res (nock4-aux `(fas (,(/ (- a 1) 2) ,b)))])
+       (nock4-aux `(fas (3 ,res))))
      ]
     [(fas ,a) `(fas ,a)] ;err, not a vaild tree index
     ;hax
     [(hax (1 (,a ,b))) a]
     [(hax (,a (,b ,c))) (guard (even? a))
-     (let ([res (nock4 `(fas ,(+ a 1) ,c))])
-       (nock4 `(hax (,(/ a 2) (,b ,res) ,c))))]
+     (let ([res (nock4-aux `(fas ,(+ a 1) ,c))])
+       (nock4-aux `(hax (,(/ a 2) (,b ,res) ,c))))]
     [(hax (,a (,b ,c))) (guard (odd? a) (>= a 3))
-     (let ([res (nock4 `(fas ,(- a 1) ,c))])
-       (nock4 `(hax (,(/ (- a 1) 2) (,res ,b) ,c))))]
+     (let ([res (nock4-aux `(fas ,(- a 1) ,c))])
+       (nock4-aux `(hax (,(/ (- a 1) 2) (,res ,b) ,c))))]
     [(hax ,a) `(hax ,a)] ;err, not a valid hax
     ;s combinator
     [(tar (,a ((,b ,c) ,d))) 
-     (let ([resl (nock4 `(tar (,a ,b ,c)))]
-	   [resr (nock4 `(tar (,a ,d)))])
+     (let ([resl (nock4-aux `(tar (,a ,b ,c)))]
+	   [resr (nock4-aux `(tar (,a ,d)))])
        `(,resl ,resr))]
-    [(tar (,a (0 ,b))) (nock4 `(fas (,b ,a)))]
+    [(tar (,a (0 ,b))) (nock4-aux `(fas (,b ,a)))]
     [(tar (,a (1 ,b))) b]
     [(tar (,a (2 (,b ,c))))
-     (let ([resl (nock4 `(tar (,a ,b)))]
-	   [resr (nock4 `(tar (,a ,c)))])
-       (nock4 `(tar (,resl ,resr))))]
+     (let ([resl (nock4-aux `(tar (,a ,b)))]
+	   [resr (nock4-aux `(tar (,a ,c)))])
+       (nock4-aux `(tar (,resl ,resr))))]
     [(tar (,a (3 ,b))) 
-     (let ([res (nock4 `(tar (,a ,b)))])
-       (nock4 `(wut ,res)))]
+     (let ([res (nock4-aux `(tar (,a ,b)))])
+       (display res)
+       (newline)
+       (nock4-aux `(wut ,res)))]
     [(tar (,a (4 ,b))) 
-     (let ([res (nock4 `(tar (,a ,b)))])
-       (nock4 `(lus ,res)))]
+     (let ([res (nock4-aux `(tar (,a ,b)))])
+       (nock4-aux `(lus ,res)))]
     [(tar (,a (5 ,b))) 
-     (let ([res (nock4 `(tar (,a ,b)))])
-       (nock4 `(tis ,res)))]
+     (let ([res (nock4-aux `(tar (,a ,b)))])
+       (nock4-aux `(tis ,res)))]
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
