@@ -120,6 +120,25 @@
 	    [resc (nock4-aux `(tar ((2 3) (0 ,resr))))]
 	    [resr (nock4-aux `(tar (,a (4 (4 ,b)))))])
        (nock4-aux `(tar (,a ,resl))))]
+    [(tar (,a (7 (,b ,c))))
+     (let ([res (nock4-aux `(tar (,a ,b)))])
+       (nock4-aux `(tar (,res ,c))))]
+    [(tar (,a (8 (,b ,c))))
+     (let ([res (nock4-aux `(tar (,a ,b)))])
+       (nock4-aux `(tar ((,res ,a) ,c))))]
+    [(tar (,a (9 (,b ,c))))
+     (let ([res (nock4-aux `(tar (,a ,c)))])
+       (nock4-aux `(tar (,res (2 ((0 1) (0 ,b)))))))]
+    [(tar (,a (10 ((,b ,c) ,d))))
+     (let ([resl (nock4-aux `(tar (,a ,c)))]
+	   [resr (nock4-aux `(tar (,a ,d)))])
+       (nock4-aux `(hax (,resl ,resr))))]
+    [(tar (,a (11 ((,b ,c) ,d))))
+     (let ([resl (nock4-aux `(tar (,a ,c)))]
+	   [resr (nock4-aux `(tar (,a ,d)))])
+       (nock4-aux `(tar ((,resl ,resr) (0 3)))))]
+    [(tar (,a (11 (,b ,c))))
+     (nock4-aux `(tar (,a ,c)))]
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
