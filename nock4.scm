@@ -111,9 +111,15 @@
     [(tar (,a (4 ,b))) 
      (let ([res (nock4-aux `(tar (,a ,b)))])
        (nock4-aux `(lus ,res)))]
-    [(tar (,a (5 ,b))) 
-     (let ([res (nock4-aux `(tar (,a ,b)))])
-       (nock4-aux `(tis ,res)))]
+    [(tar (,a (5 (,b ,c))))
+     (let ([resl (nock4-aux `(tar (,a ,b)))]
+	   [resr (nock4-aux `(tar (,a ,c)))])
+       (nock4-aux `(tis (,resl ,resr))))]
+    [(tar (,a (6 (,b (,c ,d)))))
+     (let* ([resl (nock4-aux `(tar ((,c ,d) (0 ,resc))))]
+	    [resc (nock4-aux `(tar ((2 3) (0 ,resr))))]
+	    [resr (nock4-aux `(tar (,a (4 (4 ,b)))))])
+       (nock4-aux `(tar (,a ,resl))))]
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
