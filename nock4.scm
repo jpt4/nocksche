@@ -48,7 +48,7 @@
   (match (ras a)
     ;wut
     [(wut (,a ,b))
-     (guard (equal? a b))
+     (guard (ncell? `(,a ,b)))
      0]
     [(wut ,a)
      (guard (natom? a))
