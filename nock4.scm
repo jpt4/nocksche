@@ -168,6 +168,9 @@
      (auto-cons (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(,a ,d)))]
     ))
 
-    
+;TODO
+;Write tr, fs, wt, ls, ts, hx functions to wrap (nock4-XXX) calls, write
+;another version of the interpreter with these in the main (match) term,
+;compare time, space, and ergonomic impact.
      
      
