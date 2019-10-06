@@ -60,23 +60,21 @@
      (+ 1 a)]
     ;tis
     [(tis (,a ,a)) 
-     (guard (natom? a)) 0]
+     (guard (natom? a)) 
+     0]
     [(tis (,a ,b)) 
      (guard (natom? a) (natom? b)
 	    (not (equal? a b)))
      1]
     [(tis ,x) a] ;err, not an atom or cell of atoms
     ;fas
-    [(fas (1 ,a)) 
-     (display '1-fas) (newline)
-     a]
+    [(fas (1 ,a)) a]
     [(fas (2 (,a ,b))) a]
     [(fas (3 (,a ,b))) b]
     [(fas (,a ,b)) 
      (guard (even? a) (>= a 4))
      (let ([res (nock4-aux `(fas (,(/ a 2) ,b)))])
-       (nock4-aux `(fas (2 ,res))))
-     ]
+       (nock4-aux `(fas (2 ,res))))]
     [(fas (,a ,b)) 
      (guard (odd? a) (>= a 5))
      (let ([res (nock4-aux `(fas (,(/ (- a 1) 2) ,b)))])
@@ -85,10 +83,12 @@
     [(fas ,a) `(fas ,a)] ;err, not a vaild tree index
     ;hax
     [(hax (1 (,a ,b))) a]
-    [(hax (,a (,b ,c))) (guard (even? a))
+    [(hax (,a (,b ,c))) 
+     (guard (even? a))
      (let ([res (nock4-aux `(fas ,(+ a 1) ,c))])
        (nock4-aux `(hax (,(/ a 2) (,b ,res) ,c))))]
-    [(hax (,a (,b ,c))) (guard (odd? a) (>= a 3))
+    [(hax (,a (,b ,c))) 
+     (guard (odd? a) (>= a 3))
      (let ([res (nock4-aux `(fas ,(- a 1) ,c))])
        (nock4-aux `(hax (,(/ (- a 1) 2) (,res ,b) ,c))))]
     [(hax ,a) `(hax ,a)] ;err, not a valid hax
@@ -105,8 +105,6 @@
        (nock4-aux `(tar (,resl ,resr))))]
     [(tar (,a (3 ,b))) 
      (let ([res (nock4-aux `(tar (,a ,b)))])
-       (display res)
-       (newline)
        (nock4-aux `(wut ,res)))]
     [(tar (,a (4 ,b))) 
      (let ([res (nock4-aux `(tar (,a ,b)))])
@@ -142,3 +140,34 @@
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
+;nock4-dir[ect]
+;Alternative Nock engine. Uses direct, whole term pattern matching reductions.
+(define (nock4-dir a)
+  (match (ras a)
+    [(wut (,a ,b)) 0]
+    [(wut ,a) 1]
+    [(lus (,a ,b)) `(lus (,a ,b))]
+    [(lus ,a) (guard (natom? a)) (+ 1 a)]
+    [(tis (,a ,a)) (guard (natom? a) (equal? a a)) 0]
+    [(tis (,a ,b)) (guard (natom? a) (natom? b) (not (equal? a b))) 1]
+    [(fas (1 ,a)) a]
+    [(fas (2 (,a ,b))) a]
+    [(fas (3 (,a ,b))) b]
+    [(fas (,a ,b)) (guard (>= a 4) (even? a))
+    (nock4-dir `(fas 2 ,(nock4-dir `(fas ,(/ a 2) ,b))))]
+    [(fas (,a ,b)) (guard (>= a 5) (odd? a))
+    (nock4-dir `(fas 3 ,(nock4-dir `(fas ,(/ (- a 1) 2) ,b))))]
+    [(fas ,a) `(fas ,a)]
+    [(hax (1 (,a ,b))) a]
+    [(hax (,a (,b ,c))) (guard (even? a))
+     (nock4-dir `(hax ,a (,b ,(nock4-dir `(fas ,(+ a 1) ,c))) ,c))]
+    [(hax (,a (,b ,c))) (guard (odd? a) (>= a 3))
+     (nock4-dir `(hax ,a (,(nock4-dir `(fas ,(- a 1) ,c)) ,b) ,c))]
+    [(hax ,a) `(hax ,a)]
+    [(tar (,a ((,b ,c) ,d)))
+     (auto-cons (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(,a ,d)))]
+    ))
+
+    
+     
+     
