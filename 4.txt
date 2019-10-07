@@ -32,7 +32,7 @@ nock(a)             *a
 *[a 3 b]            ?*[a b]
 *[a 4 b]            +*[a b]
 *[a 5 b c]          =[*[a b] *[a c]]
-
+  
 *[a 6 b c d]        *[a *[[c d] 0 *[[2 3] 0 *[a 4 4 b]]]]
 *[a 7 b c]          *[*[a b] c]
 *[a 8 b c]          *[[*[a b] a] c]

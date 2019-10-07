@@ -144,8 +144,8 @@
 ;Alternative Nock engine. Uses direct, whole term pattern matching reductions.
 (define (nock4-dir a)
   (match (ras a)
-    [(wut (,a ,b)) 0]
-    [(wut ,a) 1]
+    [(wut (,a ,b)) (guard (ncell? `(,a ,b))) 0]
+    [(wut ,a) (guard (natom? a)) 1]
     [(lus (,a ,b)) `(lus (,a ,b))]
     [(lus ,a) (guard (natom? a)) (+ 1 a)]
     [(tis (,a ,a)) (guard (natom? a) (equal? a a)) 0]
@@ -204,6 +204,27 @@
     [(tar ,a) `(tar ,a)]
     ))
 
-;;TODO: write fs, wt, ts, hx, ls, tr functions to bring narrow gap between
+;;TODO: write tr, wt, ls, ts, fs, hx functions to bring narrow gap between
 ;;interpreter and spec syntax. Profile all interpreter variants for time/space/
 ;;ergonomic performance.
+
+(define (tr a) '())
+
+(define (wt i)
+  (match (ras i)
+    [(,a ,b) (guard (ncell? `(,a ,b))) 0]
+    [,a (guard (natom? a)) 1]))
+
+(define (ls i)
+  (match (ras i)
+    [(,a ,b) `(lus (,a ,b))]
+    [,a (guard (natom? a)) (+ 1 a)]))
+
+(define (ts i)
+  (match (ras i)
+    [(,a ,b) `(lus (,a ,b))] ;err
+    [,a (guard (natom? a)) (+ 1 a)]))
+
+
+
+
