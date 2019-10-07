@@ -149,28 +149,61 @@
     [(lus (,a ,b)) `(lus (,a ,b))]
     [(lus ,a) (guard (natom? a)) (+ 1 a)]
     [(tis (,a ,a)) (guard (natom? a) (equal? a a)) 0]
-    [(tis (,a ,b)) (guard (natom? a) (natom? b) (not (equal? a b))) 1]
+    [(tis (,a ,b)) 
+     (guard (natom? a) (natom? b) (not (equal? a b))) 1]
     [(fas (1 ,a)) a]
     [(fas (2 (,a ,b))) a]
     [(fas (3 (,a ,b))) b]
     [(fas (,a ,b)) (guard (>= a 4) (even? a))
     (nock4-dir `(fas 2 ,(nock4-dir `(fas ,(/ a 2) ,b))))]
     [(fas (,a ,b)) (guard (>= a 5) (odd? a))
-    (nock4-dir `(fas 3 ,(nock4-dir `(fas ,(/ (- a 1) 2) ,b))))]
+    (nock4-dir 
+     `(fas 3 ,(nock4-dir `(fas ,(/ (- a 1) 2) ,b))))]
     [(fas ,a) `(fas ,a)]
     [(hax (1 (,a ,b))) a]
     [(hax (,a (,b ,c))) (guard (even? a))
-     (nock4-dir `(hax ,a (,b ,(nock4-dir `(fas ,(+ a 1) ,c))) ,c))]
+     (nock4-dir 
+      `(hax ,a (,b ,(nock4-dir `(fas ,(+ a 1) ,c))) ,c))]
     [(hax (,a (,b ,c))) (guard (odd? a) (>= a 3))
-     (nock4-dir `(hax ,a (,(nock4-dir `(fas ,(- a 1) ,c)) ,b) ,c))]
+     (nock4-dir 
+      `(hax ,a (,(nock4-dir `(fas ,(- a 1) ,c)) ,b) ,c))]
     [(hax ,a) `(hax ,a)]
     [(tar (,a ((,b ,c) ,d)))
-     (auto-cons (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(,a ,d)))]
+     (auto-cons 
+      (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(,a ,d)))]
+    [(tar (,a (0 ,b0)))
+     (nock4-dir `(fas (,b ,a)))]
+    [(tar (,a (1 ,b))) b]
+    [(tar (,a (2 (,b ,c))))
+     (nock4-dir `(tar ,(nock4-dir `(tar ,a ,b)) ,(nock4-dir `(tar ,a ,c))))]
+    [(tar (,a (3 ,b))) (nock4-dir `(wut tar (,a ,b)))]
+    [(tar (,a (4 ,b))) (nock4-dir `(lus tar (,a ,b)))]
+    [(tar (,a (5 (,b ,c))))
+     (nock4-dir `(tis ,(nock4-dir `(tar ,a ,b)) ,(nock4-dir `(tar ,a ,c))))]
+    [(tar (,a (6 (,b (,c ,d)))))
+     (nock4-dir 
+      `(tar ,a 
+	    ,(nock4-dir 
+	      `(tar (,c ,d) 0 
+		    ,(nock4-dir 
+		      `(tar (2 3) 0 
+			    ,(nock4-dir 
+			      `(tar ,a 4 4 ,b))))))))]
+    [(tar (,a (7 (,b ,c)))) 
+     (nock4-dir `(tar ,(nock4-dir `(tar ,a ,b)) ,c))]
+    [(tar (,a (8 (,b ,c)))) 
+     (nock4-dir `(tar (,(nock4-dir `(tar ,a ,b)) ,a) ,c))]
+    [(tar (,a (9 (,b ,c))))
+     (nock4-dir `(tar ,(nock4-dir `(tar ,a ,c)) 2 (0 1) 0 ,b))]
+    [(tar (,a (10 ((,b ,c) ,d))))
+     (nock4-dir `(hax ,b ,(nock4-dir `(tar ,a ,c)) ,(nock4-dir `(tar ,a ,d))))]
+    [(tar (,a (11 ((,b ,c) ,d))))
+     (nock4-dir `(tar (,(nock4-dir `(tar ,a ,c)) ,(nock4-dir `(tar ,a ,d))) 0 3))]
+    [(tar (,a (11 (,b ,c)))) 
+     (nock4-dir `(tar ,a ,c))]
+    [(tar ,a) `(tar ,a)]
     ))
 
-;TODO
-;Write tr, fs, wt, ls, ts, hx functions to wrap (nock4-XXX) calls, write
-;another version of the interpreter with these in the main (match) term,
-;compare time, space, and ergonomic impact.
-     
-     
+;;TODO: write fs, wt, ts, hx, ls, tr functions to bring narrow gap between
+;;interpreter and spec syntax. Profile all interpreter variants for time/space/
+;;ergonomic performance.
