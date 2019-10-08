@@ -170,7 +170,7 @@
     [(hax ,a) `(hax ,a)]
     [(tar (,a ((,b ,c) ,d)))
      (auto-cons 
-      (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(,a ,d)))]
+      (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(tar ,a ,d)))]
     [(tar (,a (0 ,b0)))
      (nock4-dir `(fas (,b ,a)))]
     [(tar (,a (1 ,b))) b]
@@ -204,11 +204,9 @@
     [(tar ,a) `(tar ,a)]
     ))
 
-;;TODO: write tr, wt, ls, ts, fs, hx functions to bring narrow gap between
+;;TODO: write wt, ls, ts, fs, hx, tr functions to narrow the gap between
 ;;interpreter and spec syntax. Profile all interpreter variants for time/space/
 ;;ergonomic performance.
-
-(define (tr a) '())
 
 (define (wt i)
   (match (ras i)
@@ -222,9 +220,61 @@
 
 (define (ts i)
   (match (ras i)
-    [(,a ,b) `(lus (,a ,b))] ;err
-    [,a (guard (natom? a)) (+ 1 a)]))
+    [(,a ,a) (guard (natom? a) (equal? a a)) 0]
+    [(,a ,b) (guard (natom? a) (natom? b) (not (equal? a b))) 1]))
 
+;TODO: Consider multiple value parameters.
+#;(define (fs i . arg)
+  (ras (cons i arg)))
+
+(define (fs i)
+  (match (ras i)
+    [(1 ,a) a]
+    [(2 (,a ,b)) a]
+    [(3 (,a ,b)) b]
+    [(,a ,b) (guard (>= a 4) (even? a)) (fs `(2 ,(fs (/ (- a 1) 2) b)))]
+    [(,a ,b) (guard (>= a 5) (odd? a)) (fs `(3 ,(fs (/ (- a 1) 2) b)))]
+    [,a `(fas ,a)]))
+
+(define (hx i)
+  (match (ras i)
+    [(1 (,a ,b)) a]
+    [(,a (,b ,c)) (guard (even? a)) (hx `(,a (,b ,(fs `,(+ a 1) c)) ,c))]
+    [(,a (,b ,c)) (guard (odd? a) (>= a 3))
+     (hx `(,a (,(fs `(,(- a 1) ,c)) ,b) ,c))]
+    [,a `(hax ,a)]))
+
+(define (tr a)
+  (match (ras a)
+    [(,a ((,b ,c) ,d))
+     (auto-cons (tr `(,a ,b ,c)) (tr `(,a ,d)))]
+    [(,a (0 ,b0)) (fs `(,b ,a))]
+    [(,a (1 ,b)) b]
+    [(,a (2 (,b ,c)))
+     (tr `(,(tr `(,a ,b)) ,(tr `(,a ,c))))]
+    [(,a (3 ,b)) (wt (tr `(,a ,b)))]
+    [(,a (4 ,b)) (ls (tr `(,a ,b)))]
+    [(,a (5 (,b ,c))) (ts `(,(tr `(,a ,b)) ,(tr `(,a ,c))))]
+    [(,a (6 (,b (,c ,d))))
+     (tr `(,a 
+	   ,(tr `((,c ,d) 0  
+		  ,(tr `((2 3) 0 
+			 ,(tr `(,a 4 4 ,b))))))))]
+    [(,a (7 (,b ,c))) 
+     (tr `(`(tr `(,a ,b)) ,c))]
+    [(,a (8 (,b ,c))) 
+     (tr `((,(tr `(,a ,b)) ,a) ,c))]
+    [(,a (9 (,b ,c))) 
+     (tr `(,(tr `(,a ,c)) 2 (0 1) 0 ,b))]
+    [(,a (10 ((,b ,c) ,d)))
+     (hx `(,b ,(tr `(,a ,c)) ,(tr `(,a ,d))))]
+    [(,a (11 ((,b ,c) ,d)))
+     (tr `((,(tr `(,a ,c)) ,(tr `(,a ,d))) 0 3))]
+    [(,a (11 (,b ,c)))
+     (tr `(,a ,c))]
+    [,a `(tar ,a)]))
+
+(define (nock4-fun a) (tr a))
 
 
 
