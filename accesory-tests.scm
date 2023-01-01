@@ -9,6 +9,3 @@
 (test 'ntuple?-not-pair (ntuple? '1) #f)
 (test 'ntuple?-null-cdr (ntuple? '(1)) #f)
 (test 'ntuple?-empty-list (ntuple?' ()) #f)
-
-
-

@@ -1,22 +1,22 @@
-;;nock4.scm
-;;20181014Z
-;;jpt4
-;;nock 4K in Chez Scheme
+;;  nock4.scm
+;;  20181014Z
+;;  jpt4
+;;  Nock 4K in Chez Scheme
 
 (load "match.scm")
-
+;;  nock tuple
 (define (ntuple? a) (and (pair? a) (not (null? (cdr a)))))
-
+;;  nock operation
 (define (nop? a) (member a '(tar wut lus tis fas hax)))
-
+;;  nock noun
 (define (nnoun? a)
   (or (natom? a) (ncell? a)))
-
+;;  nock atom
 (define (natom? a) 
   (if (integer? a)
       (>= a 0)
       #f))
-
+;;  nock cell
 (define (ncell? a)
   (match a
    [(,a ,b) 
@@ -24,7 +24,7 @@
    [,a #f]))
 
 (define (auto-cons a b) (list a b))  
-
+;;  make nock expression right associative
 (define (ras a)
   (cond
    [(natom? a) a]
@@ -140,8 +140,8 @@
     [,e `(* ,a)] ;err, no pattern match, loop
     ))
 
-;nock4-dir[ect]
-;Alternative Nock engine. Uses direct, whole term pattern matching reductions.
+;;  nock4-dir[ect]
+;;  Alternative Nock engine. Uses direct, whole term pattern matching reductions.
 (define (nock4-dir a)
   (match (ras a)
     [(wut (,a ,b)) (guard (ncell? `(,a ,b))) 0]
