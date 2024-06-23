@@ -171,7 +171,7 @@
     [(tar (,a ((,b ,c) ,d)))
      (auto-cons 
       (nock4-dir `(tar ,a ,b ,c)) (nock4-dir `(tar ,a ,d)))]
-    [(tar (,a (0 ,b0)))
+    [(tar (,a (0 ,b)))
      (nock4-dir `(fas (,b ,a)))]
     [(tar (,a (1 ,b))) b]
     [(tar (,a (2 (,b ,c))))
@@ -204,9 +204,9 @@
     [(tar ,a) `(tar ,a)]
     ))
 
-;;TODO: write wt, ls, ts, fs, hx, tr functions to narrow the gap between
-;;interpreter and spec syntax. Profile all interpreter variants for time/space/
-;;ergonomic performance.
+;;TODO: write wt, ls, ts, fs, hx, tr functions to narrow the gap
+;;between interpreter and spec syntax. Profile all interpreter
+;;variants for time/space/ ergonomic performance.
 
 (define (wt i)
   (match (ras i)
@@ -276,5 +276,68 @@
 
 (define (nock4-fun a) (tr a))
 
+;; nock4-out
+;; Whole term pattern matching with only outermost reduction where possible
 
-
+(define (nock4-out a)
+  (match (ras a)
+    [(wut (,a ,b)) (guard (ncell? `(,a ,b))) 0]
+    [(wut ,a) (guard (natom? a)) 1]
+    [(lus (,a ,b)) `(lus (,a ,b))]
+    [(lus ,a) (guard (natom? a)) (+ 1 a)]
+    [(tis (,a ,a)) (guard (natom? a) (equal? a a)) 0]
+    [(tis (,a ,b)) 
+     (guard (natom? a) (natom? b) (not (equal? a b))) 1]
+    [(fas (1 ,a)) a]
+    [(fas (2 (,a ,b))) a]
+    [(fas (3 (,a ,b))) b]
+    ;first redex distinguished by outermost reduction.
+    [(fas (,a ,b)) (guard (>= a 4) (even? a))
+    (nock4-out `(fas 2 `(fas ,(/ a 2) ,b)))] ;the unevaluated inner fas maps to "a" in /[2 a b]. Lack of "b" prevents further evaluation. Explicit evaluation of inner fas thus required.
+    [(fas (,a ,b)) (guard (>= a 5) (odd? a))
+    (nock4-out 
+     `(fas 3 ,(nock4-out `(fas ,(/ (- a 1) 2) ,b))))]
+    [(fas ,a) `(fas ,a)]
+    [(hax (1 (,a ,b))) a]
+    [(hax (,a (,b ,c))) (guard (even? a))
+     (nock4-out 
+      `(hax ,a (,b ,(nock4-out `(fas ,(+ a 1) ,c))) ,c))]
+    [(hax (,a (,b ,c))) (guard (odd? a) (>= a 3))
+     (nock4-out 
+      `(hax ,a (,(nock4-out `(fas ,(- a 1) ,c)) ,b) ,c))]
+    [(hax ,a) `(hax ,a)]
+    [(tar (,a ((,b ,c) ,d)))
+     (auto-cons 
+      (nock4-out `(tar ,a ,b ,c)) (nock4-out `(tar ,a ,d)))]
+    [(tar (,a (0 ,b)))
+     (nock4-out `(fas (,b ,a)))]
+    [(tar (,a (1 ,b))) b]
+    [(tar (,a (2 (,b ,c))))
+     (nock4-out `(tar ,(nock4-out `(tar ,a ,b)) ,(nock4-out `(tar ,a ,c))))]
+    [(tar (,a (3 ,b))) (nock4-out `(wut tar (,a ,b)))]
+    [(tar (,a (4 ,b))) (nock4-out `(lus tar (,a ,b)))]
+    [(tar (,a (5 (,b ,c))))
+     (nock4-out `(tis ,(nock4-out `(tar ,a ,b)) ,(nock4-out `(tar ,a ,c))))]
+    [(tar (,a (6 (,b (,c ,d)))))
+     (nock4-out 
+      `(tar ,a 
+	    ,(nock4-out 
+	      `(tar (,c ,d) 0 
+		    ,(nock4-out 
+		      `(tar (2 3) 0 
+			    ,(nock4-out 
+			      `(tar ,a 4 4 ,b))))))))]
+    [(tar (,a (7 (,b ,c)))) 
+     (nock4-out `(tar ,(nock4-out `(tar ,a ,b)) ,c))]
+    [(tar (,a (8 (,b ,c)))) 
+     (nock4-out `(tar (,(nock4-out `(tar ,a ,b)) ,a) ,c))]
+    [(tar (,a (9 (,b ,c))))
+     (nock4-out `(tar ,(nock4-out `(tar ,a ,c)) 2 (0 1) 0 ,b))]
+    [(tar (,a (10 ((,b ,c) ,d))))
+     (nock4-out `(hax ,b ,(nock4-out `(tar ,a ,c)) ,(nock4-out `(tar ,a ,d))))]
+    [(tar (,a (11 ((,b ,c) ,d))))
+     (nock4-out `(tar (,(nock4-out `(tar ,a ,c)) ,(nock4-out `(tar ,a ,d))) 0 3))]
+    [(tar (,a (11 (,b ,c)))) 
+     (nock4-out `(tar ,a ,c))]
+    [(tar ,a) `(tar ,a)]
+    ))
